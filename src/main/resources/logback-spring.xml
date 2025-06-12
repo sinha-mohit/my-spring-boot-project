@@ -45,7 +45,7 @@
     </encoder>
   </appender>
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>logs/app-log.${current.date}.json</file>
+    <file>logs/app-log.json</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
       <fileNamePattern>logs/app-log.%d{yyyy-MM-dd}.json</fileNamePattern>
       <maxHistory>7</maxHistory>
