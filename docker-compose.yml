@@ -37,7 +37,7 @@ services:
       - .env
     restart: unless-stopped
     volumes:
-      - /app/logs
+      - logs:/app/logs
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
@@ -93,7 +93,7 @@ services:
       - logstash
     volumes:
       - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - /app/logs:/logs:ro
+      - logs:/logs:ro
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     command: ["--strict.perms=false"]
@@ -101,3 +101,4 @@ services:
 volumes:
   mysql_data:
   esdata:
+  logs:
