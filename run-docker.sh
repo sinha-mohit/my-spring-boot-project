@@ -29,4 +29,9 @@ fi
 
 echo "Spring Boot app and MySQL are running in Docker."
 echo "App:     http://localhost:8080"
-echo "MySQL:   localhost:3306 (user: $MYSQL_USER, password: $MYSQL_PASSWORD)"
+echo "MySQL:   localhost:3309 (user: $MYSQL_USER, password: $MYSQL_PASSWORD)"
+echo "To stop the services, run: docker-compose down -v"
+echo "To remove all containers and images, run: ./clean-docker.sh"
+echo "Kibana:  http://localhost:5601"
+echo "Elasticsearch: http://localhost:9200"
+echo "Logstash (host port): localhost:15000 (internal: 5000, for Filebeat)"

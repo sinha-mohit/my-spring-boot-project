@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.sql.Time;
 import java.util.Random;
 
 @Component
@@ -25,14 +26,18 @@ public class LogGenerator {
     private static final Random random = new Random();
 
     public LogGenerator() {
-        logger.info("LogGenerator initialized! If you see this, the bean is active and scheduled tasks should run.");
+        // add time also in the log messages
+        Time currentTime = new Time(System.currentTimeMillis());
+        logger.info(currentTime + "LogGenerator initialized! If you see this, the bean is active and scheduled tasks should run.");
     }
 
-    // 5 logs every second = 300 logs per minute
-    @Scheduled(fixedRate = 200)
+    // 1 log every 10 seconds = 6 logs per minute
+    @Scheduled(fixedRate = 10000)
     public void generateLogs() {
+         // add time also in the log messages
+        Time currentTime = new Time(System.currentTimeMillis());
         int logType = random.nextInt(4);
-        String message = messages[random.nextInt(messages.length)];
+        String message = messages[random.nextInt(messages.length)] + " at " + currentTime;
         switch (logType) {
             case 0:
                 logger.info(message);

@@ -167,3 +167,14 @@ graph TD
         G
     end
 ```
+
+### Port Reference
+- **App**: [http://localhost:8080](http://localhost:8080)
+- **MySQL**: `localhost:3309` (user: `$MYSQL_USER`, password: `$MYSQL_PASSWORD`)
+- **Kibana**: [http://localhost:5601](http://localhost:5601)
+- **Elasticsearch**: [http://localhost:9200](http://localhost:9200)
+- **Logstash (host port)**: `localhost:15000` (internal: 5000, for Filebeat)
+
+### Filebeat & Logstash
+- Filebeat is configured in `filebeat.yml` to read all JSON logs from `/logs/*.json` and forward them to Logstash at `logstash:5000` (internal Docker network).
+- Logstash host port is mapped to `15000` to avoid conflicts, but Filebeat uses the internal port.
