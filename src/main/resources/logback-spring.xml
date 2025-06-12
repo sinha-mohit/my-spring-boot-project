@@ -5,6 +5,14 @@
         <timestamp>
           <fieldName>timestamp</fieldName>
         </timestamp>
+        <mdc/>
+        <context/>
+        <logLevel/>
+        <loggerName/>
+        <threadName/>
+        <processId/>
+        <processName/>
+        <hostName/>
         <pattern>
           <pattern>
             {
@@ -36,7 +44,54 @@
       </providers>
     </encoder>
   </appender>
-  <root level="INFO">
+  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+    <file>logs/app-log.json</file>
+    <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+      <providers>
+        <timestamp>
+          <fieldName>timestamp</fieldName>
+        </timestamp>
+        <mdc/>
+        <context/>
+        <logLevel/>
+        <loggerName/>
+        <threadName/>
+        <processId/>
+        <processName/>
+        <hostName/>
+        <pattern>
+          <pattern>
+            {
+              "timestamp": "%date{ISO8601}",
+              "level": "%level",
+              "thread": "%thread",
+              "logger": "%logger",
+              "message": "%message",
+              "context": "%mdc",
+              "exception": "%ex{full}",
+              "caller": "%caller",
+              "class": "%class",
+              "method": "%method",
+              "file": "%file",
+              "line": "%line",
+              "application": "my-spring-boot-project",
+              "host": "${HOSTNAME:-unknown}",
+              "traceId": "%X{traceId}",
+              "spanId": "%X{spanId}",
+              "user": "%X{user}",
+              "requestId": "%X{requestId}",
+              "uri": "%X{uri}",
+              "remoteAddr": "%X{remoteAddr}"
+            }
+          </pattern>
+        </pattern>
+        <arguments/>
+        <stackTrace/>
+      </providers>
+    </encoder>
+  </appender>
+  <root level="DEBUG">
     <appender-ref ref="STDOUT"/>
+    <appender-ref ref="FILE"/>
   </root>
 </configuration>
