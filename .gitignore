@@ -42,5 +42,6 @@ out/
 *.env.development.local
 
 ### Logs ###
-logs/
+logs/*
+/logs
 *.log
