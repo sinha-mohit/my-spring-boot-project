@@ -44,8 +44,15 @@
       </providers>
     </encoder>
   </appender>
-  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <file>logs/app-log.json</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- Roll log file every day and keep 7 days of history -->
+      <fileNamePattern>logs/app-log.%d{yyyy-MM-dd}.json</fileNamePattern>
+      <maxHistory>7</maxHistory>
+      <!-- Optionally, set a total size cap for all log files -->
+      <totalSizeCap>1GB</totalSizeCap>
+    </rollingPolicy>
     <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
       <providers>
         <timestamp>
