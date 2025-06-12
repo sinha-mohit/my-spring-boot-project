@@ -94,3 +94,76 @@ MYSQL_ROOT_PASSWORD=root_password
 ---
 
 This setup allows you to easily run and develop your Spring Boot + MySQL stack locally or in any Docker-compatible environment. It also enables both your Spring Boot app (in Docker) and your local tools to access the same MySQL database, each using the correct port and host.
+
+## Multi-Profile Setup
+- **Local profile**: Connects to MySQL running on your Mac.
+- **Docker profile**: Connects to MySQL service in Docker Compose.
+
+## ELK Stack & Filebeat Integration (Dockerized)
+
+This project includes a full ELK stack (Elasticsearch, Logstash, Kibana) and Filebeat for centralized log management and visualization.
+
+### How it works
+- Spring Boot writes JSON logs to `logs/app-log.json`.
+- Filebeat (in Docker) reads these logs and ships them to Logstash.
+- Logstash processes and forwards logs to Elasticsearch.
+- Kibana provides a UI for searching and visualizing logs at [http://localhost:5601](http://localhost:5601).
+
+### Running Everything
+1. Ensure your `.env` file is present in the project root with MySQL credentials.
+2. Run:
+   ```sh
+   ./run-docker.sh
+   ```
+   This will build and start all services: Spring Boot app, MySQL, Elasticsearch, Logstash, Kibana, and Filebeat.
+
+3. Access services:
+   - **App**: [http://localhost:8080](http://localhost:8080)
+   - **MySQL**: `localhost:3309` (user: `$MYSQL_USER`, password: `$MYSQL_PASSWORD`)
+   - **Kibana**: [http://localhost:5601](http://localhost:5601)
+   - **Elasticsearch**: [http://localhost:9200](http://localhost:9200)
+
+4. View logs in Kibana:
+   - Go to "Discover" in Kibana and search the `spring-boot-logs-*` index.
+
+### File/Service Overview
+- `docker-compose.yml`: Orchestrates all services (app, MySQL, Elasticsearch, Logstash, Kibana, Filebeat).
+- `logstash.conf`: Logstash pipeline config for ingesting logs from Filebeat and sending to Elasticsearch.
+- `filebeat.yml`: Filebeat config for reading JSON logs and forwarding to Logstash.
+- `logs/`: Directory where Spring Boot writes JSON logs (ignored by git).
+
+### Notes
+- Elasticsearch data is persisted in the `esdata` Docker volume.
+- MySQL data is persisted in the `mysql_data` Docker volume.
+- Log files are rotated and retained as configured in `logback-spring.xml`.
+- The default log retention is 7 days or 10MB total size.
+
+### Security
+- Do not commit your `.env` file to version control.
+- For production, consider using a secrets manager or Docker secrets for sensitive credentials.
+
+---
+
+This setup allows you to develop, run, and monitor your Spring Boot app with full log visibility using the ELK stack, all in Docker.
+
+## Architecture Diagram
+
+```mermaid
+graph TD
+    A[Spring Boot App] -- writes JSON logs --> B[logs/app-log.json]
+    B -- reads logs --> C[Filebeat]
+    C -- ships logs --> D[Logstash]
+    D -- processes logs --> E[Elasticsearch]
+    E -- indexed logs --> F[Kibana]
+    F -- UI for search & visualization --> User((User))
+    A -- connects to --> G[MySQL]
+    G[(MySQL DB)]
+    subgraph Docker Compose Network
+        A
+        C
+        D
+        E
+        F
+        G
+    end
+```
