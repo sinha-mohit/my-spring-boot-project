@@ -2,105 +2,95 @@
 
 ## MySQL Database Setup
 
-1. Create the database and user in MySQL:
-
-```sh
-mysql -u root -p
-```
-
-Then in the MySQL prompt:
-```sql
-CREATE DATABASE MySpringBootProject;
-CREATE USER 'springbootuser'@'localhost' IDENTIFIED BY 'springbootuser';
-GRANT ALL PRIVILEGES ON MySpringBootProject.* TO 'springbootuser'@'localhost';
-FLUSH PRIVILEGES;
-EXIT;
-```
-
-2. Update your `src/main/resources/application.properties`:
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/MySpringBootProject
-spring.datasource.username=${MYSQL_USER}
-spring.datasource.password=${MYSQL_PASSWORD}
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-```
-
-## Using .env for MySQL Credentials in Spring Boot
-
-Spring Boot does not natively support .env files, but you can use the dotenv-java library to load environment variables from a .env file.
-
-### Steps:
-
-1. **Add the dependency to your `build.gradle`:**
-   ```groovy
-   implementation 'io.github.cdimascio:dotenv-java:3.0.0'
-   ```
-
-2. **Create a `.env` file in your project root:**
+1. Create a `.env` file in your project root with the following content:
    ```env
-   MYSQL_USER=username
-   MYSQL_PASSWORD=password
+   MYSQL_USER=user_name
+   MYSQL_PASSWORD=MYSQL_USER=user_password
+   MYSQL_ROOT_PASSWORD=root_password
    ```
 
-3. **Update your `application.properties`:**
+2. The application is configured to use these environment variables for MySQL connection in `src/main/resources/application.properties`:
    ```properties
+   spring.datasource.url=jdbc:mysql://mysql:3306/MySpringBootProject
    spring.datasource.username=${MYSQL_USER}
    spring.datasource.password=${MYSQL_PASSWORD}
+   spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+   spring.jpa.hibernate.ddl-auto=update
+   spring.jpa.show-sql=true
    ```
 
-4. **Load the .env file in your main application class:**
-   ```java
-   import io.github.cdimascio.dotenv.Dotenv;
-   // ...existing code...
-   public static void main(String[] args) {
-       Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
-       System.setProperty("MYSQL_USER", dotenv.get("MYSQL_USER"));
-       System.setProperty("MYSQL_PASSWORD", dotenv.get("MYSQL_PASSWORD"));
-       SpringApplication.run(MySpringBootProjectApplication.class, args);
-   }
-   // ...existing code...
+3. MySQL is exposed on host port **3309** and container port **3306**.
+4. Spring Boot (in Docker) connects to MySQL using the service name `mysql` and port `3306`.
+5. You can connect to MySQL from your host (e.g., MySQL Workbench) using:
+   - Host: `localhost`
+   - Port: `3309`
+   - User: `${MYSQL_USER}` (from your .env file)
+   - Password: `${MYSQL_PASSWORD}` (from your .env file)
+   - Database: `MySpringBootProject`
+
+## How Connections Work
+
+- **Spring Boot app (Docker Compose):**
+  - Connects to MySQL with: `jdbc:mysql://mysql:3306/MySpringBootProject`
+  - Uses Docker Compose service networking (host is `mysql`, port is `3306`)
+- **Local tools (Workbench, CLI, etc.):**
+  - Connect to MySQL with: `localhost:3309`
+  - Uses the mapped host port from Docker Compose
+
+## Running with Docker Compose
+
+Docker Compose is used to orchestrate both the Spring Boot application and a MySQL database container.
+
+### Steps:
+1. Make sure your `.env` file is present in the project root with the correct credentials.
+2. Run the following command to build and start both services:
+   ```sh
+   ./run-docker.sh
    ```
+   This script will:
+   - Build the Spring Boot JAR (skipping tests)
+   - Remove any existing containers/images with the same name
+   - Build and start both the app and MySQL using `docker-compose up --build -d`
+
+3. Access your services:
+   - Spring Boot app: [http://localhost:8080](http://localhost:8080)
+
+4. To stop all services:
+   ```sh
+   docker-compose down
+   ```
+
+### docker-compose.yml Overview
+- The `mysql` service uses the official MySQL 8.0 image and reads credentials from environment variables.
+- The `app` service builds your Spring Boot project and connects to the MySQL service using the service name `mysql` as the host.
+- Both services use the same `.env` file for credentials.
+- MySQL data is persisted in a Docker volume (`mysql_data`).
+- The app will wait for MySQL to be healthy before starting.
+
+## Example .env file
+```
+MYSQL_USER=user_name
+MYSQL_PASSWORD=MYSQL_USER=user_password
+MYSQL_ROOT_PASSWORD=root_password
+```
+
+## Quick Start
+1. Make sure your `.env` file is present in the project root with the correct credentials.
+2. Run:
+   ```sh
+   ./run-docker.sh
+   ```
+3. Access your app at [http://localhost:8080](http://localhost:8080)
+4. Access MySQL from your host at `localhost:3309` with the credentials from `.env`.
+
+## Security Note
+- Do not commit your `.env` file to version control. Add it to `.gitignore`.
+- For production, consider using a secrets manager or Docker secrets for sensitive credentials.
 
 ## Logging and ELK Integration
+- Logs are output in JSON format to both the console and `logs/app-log.json`.
+- Log rotation and retention are configured in `logback-spring.xml`.
 
-- Logging is configured in `src/main/resources/logback-spring.xml` to output logs in JSON format, suitable for ELK (Elasticsearch, Logstash, Kibana).
-- Logs are written to both the console and to `logs/app-log.json`.
-- The log pattern includes rich context: timestamp, level, thread, logger, message, MDC, exception, caller, class, method, file, line, application, host, traceId, spanId, user, requestId, uri, remoteAddr, and more.
-- Log generation is handled by `LogGenerator` in the `logging` package, which produces 300 logs per minute at various log levels.
+---
 
-## Dockerization
-
-A `Dockerfile` is provided to containerize the application:
-
-```
-FROM eclipse-temurin:17-jdk-alpine
-WORKDIR /app
-COPY build/libs/my-spring-boot-project-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java","-jar","/app/app.jar"]
-```
-
-## Running with Docker
-
-A shell script `run-docker.sh` is included to automate the build and run process:
-
-```
-#!/bin/zsh
-./gradlew clean build
-docker build -t my-spring-boot-project .
-docker run -d --name my-spring-boot-project -p 8080:8080 my-spring-boot-project
-echo "Spring Boot app is running in Docker on http://localhost:8080"
-```
-
-To use:
-```sh
-chmod +x run-docker.sh
-./run-docker.sh
-```
-
-## Notes
-- Make sure your MySQL server is running and accessible from the Docker container (use host networking or set up a Docker network if needed).
-- The application will continuously generate logs for ELK/Kibana analysis.
-- You can customize log generation, log format, and Docker settings as needed.
+This setup allows you to easily run and develop your Spring Boot + MySQL stack locally or in any Docker-compatible environment. It also enables both your Spring Boot app (in Docker) and your local tools to access the same MySQL database, each using the correct port and host.
