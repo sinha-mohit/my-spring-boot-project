@@ -1,11 +1,9 @@
 package com.ms.my_spring_boot_project.service;
 
-import com.ms.my_spring_boot_project.logging.LogGenerator;
 import com.ms.my_spring_boot_project.model.Todo;
 import com.ms.my_spring_boot_project.repository.TodoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
