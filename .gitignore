@@ -40,3 +40,6 @@ out/
 *.env
 *.env.local
 *.env.development.local
+
+### logs ###
+logs/app-log.json
