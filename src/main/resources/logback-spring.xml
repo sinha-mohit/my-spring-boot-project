@@ -1,4 +1,31 @@
-<configuration>
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="10 seconds">
+
+  <springProfiler name="local, dev, test, stg">
+    <property name="LEVEL" value="DEBUG"/>
+
+    <!-- hibernate logger -->
+    <logger name="org.hibernate.SQL" level="DEBUG"/>
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="DEBUG"/>
+    <logger name="org.hibernate.type.descriptor.sql.BasicExtractor" level="DEBUG"/>
+    <logger name="org.hibernate.type.descriptor" level="DEBUG"/>
+
+  </springProfiler>
+
+  <springProfiler name="docker">
+    <property name="LEVEL" value="DEBUG"/>
+
+   <!-- hibernate logger -->
+    <logger name="org.hibernate.SQL" level="DEBUG"/>
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="DEBUG"/>
+    <logger name="org.hibernate.type.descriptor.sql.BasicExtractor" level="DEBUG"/>
+    <logger name="org.hibernate.type.descriptor" level="DEBUG"/>
+  </springProfiler>
+
+
+
+
+
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
       <providers>
@@ -96,7 +123,19 @@
       </providers>
     </encoder>
   </appender>
-  <root level="DEBUG">
+
+  <!-- Spring Framework -->
+  <logger name="org.springframework" level="INFO"/>
+  <logger name="org.springframework.web" level="INFO"/>
+
+  <!-- JPA -->
+  <logger name="org.springframework.data.jpa" level="INFO"/>
+
+  <!-- Hinernate -->
+  <logger name="org.hibernate" level="INFO"/>
+
+
+  <root level="${LEVEL}">
     <appender-ref ref="STDOUT"/>
     <appender-ref ref="FILE"/>
   </root>
